@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     >
-    <android.support.v4.view.ViewPager
+    <com.marxin.main.banner.AutoScrollViewPager
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/banner_viewpager"
@@ -12,5 +12,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/banner_single_img"
+        android:scaleType="fitXY"
         />
 </RelativeLayout>

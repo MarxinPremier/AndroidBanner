@@ -19,6 +19,12 @@ android {
     }
 }
 
+task clean(type: Exec) {
+    ext.lockhunter = '\"C:\\lockhunter\\LockHunter\\LockHunter.exe\"'
+    def buildDir = file(new File("build"))
+    commandLine 'cmd', "$lockhunter", '/delete', '/silent', buildDir
+}
+
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
