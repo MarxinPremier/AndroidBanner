@@ -17,26 +17,26 @@ import java.util.ArrayList;
 
 /**
  * @author premier
- *
- * banner的封装
- * 采用viewpager加单张imageview的方案来实现
- * 1.多余一张图片的时候用viewpager 来实现无线轮滑的效果
- * 2.一张图片的时候不能轮滑
- * 3.零张图片的时候显示默认图片
- *
+ *         <p>
+ *         banner的封装
+ *         采用viewpager加单张imageview的方案来实现
+ *         1.多余一张图片的时候用viewpager 来实现无线轮滑的效果
+ *         2.一张图片的时候不能轮滑
+ *         3.零张图片的时候显示默认图片
  */
-public class Banner  extends RelativeLayout{
+public class Banner extends RelativeLayout {
 
     //上下文
-    private  Context context;
+    private Context context;
     //基本view
     private View baseView;
     //viewpager 可被继承使用
-    protected ViewPager viewPager;
+    protected AutoScrollViewPager viewPager;
     //单张图片使用的控件 可被继承使用
     protected ImageView singlImg;
     //数据源
     private ArrayList<String> dataurl = new ArrayList<>();
+    private BannerViewPagerAdapter adapter;
 
     public Banner(Context context) {
         super(context);
@@ -75,7 +75,7 @@ public class Banner  extends RelativeLayout{
      * 初始化url
      */
     private void initDataUrl() {
-        dataurl.add("banner");
+        dataurl.add("http://img06.tooopen.com/images/20160906/tooopen_sy_177992564428.jpg");
     }
 
     /**
@@ -91,18 +91,17 @@ public class Banner  extends RelativeLayout{
      */
     private void initBanner() {
         //适配器
-        BannerViewPagerAdapter adapter = new BannerViewPagerAdapter(context, dataurl, new BannerViewPagerAdapter.ClickCallBack() {
+        adapter = new BannerViewPagerAdapter(context, dataurl, new BannerViewPagerAdapter.ClickCallBack() {
             @Override
             public void callback(Object object) {
                 String url = (String) object;
-                Toast.makeText(context,url,Toast.LENGTH_LONG).show();
+                Toast.makeText(context, url, Toast.LENGTH_LONG).show();
             }
         });
         viewPager.setAdapter(adapter);
         adapter.notifyDataSetChanged();
-        viewPager.setCurrentItem(Integer.MAX_VALUE/2);
+        viewPager.setCurrentItem(Integer.MAX_VALUE / 2);
         //监听器
-
     }
 
     /**
@@ -112,8 +111,9 @@ public class Banner  extends RelativeLayout{
         //因为是同一个高度。singleimg和viewpager使用用一个layoutparams就可以
         ViewGroup.LayoutParams layoutParams = viewPager.getLayoutParams();
         //默认设置为屏幕高度的4分之一
-        layoutParams.height = getScreenHeight()/4;
+        layoutParams.height = getScreenHeight() / 4;
         viewPager.setLayoutParams(layoutParams);
+        layoutParams.width = getScreenWidth();
         singlImg.setLayoutParams(layoutParams);
     }
 
@@ -123,9 +123,9 @@ public class Banner  extends RelativeLayout{
      */
     private void findView() {
         //主布局
-        baseView = LayoutInflater.from(context).inflate(R.layout.banner_layout,this);
+        baseView = LayoutInflater.from(context).inflate(R.layout.banner_layout, this);
         //viewpager
-        viewPager = (ViewPager) baseView.findViewById(R.id.banner_viewpager);
+        viewPager = (AutoScrollViewPager) baseView.findViewById(R.id.banner_viewpager);
         //单张图片
         singlImg = (ImageView) baseView.findViewById(R.id.banner_single_img);
     }
@@ -133,7 +133,7 @@ public class Banner  extends RelativeLayout{
     /**
      * 获取屏幕宽度的方法
      */
-    protected int getScreenWidth(){
+    protected int getScreenWidth() {
         WindowManager wm = (WindowManager) getContext()
 
                 .getSystemService(Context.WINDOW_SERVICE);
@@ -144,11 +144,48 @@ public class Banner  extends RelativeLayout{
     /**
      * 获取屏幕宽度的方法
      */
-    protected int getScreenHeight(){
+    protected int getScreenHeight() {
         WindowManager wm = (WindowManager) getContext()
 
                 .getSystemService(Context.WINDOW_SERVICE);
         int height = wm.getDefaultDisplay().getHeight();
         return height;
+    }
+
+    /**
+     * 更新数据
+     *
+     * @param dataurl
+     */
+    public void setDataurl(ArrayList<String> dataurl) {
+        this.dataurl.clear();
+        this.dataurl.addAll(dataurl);
+        if (dataurl.size() == 1) {
+            viewPager.stopAutoScroll();
+            singlImg.setVisibility(VISIBLE);
+            viewPager.setVisibility(GONE);
+            adapter.singleImgLoader(singlImg, dataurl.get(0));
+        } else if (dataurl.size() > 1) {
+            viewPager.setVisibility(VISIBLE);
+            adapter.notifyDataSetChanged();
+            singlImg.setVisibility(GONE);
+            startViewPagerScroll(1500);
+        }
+    }
+
+    /**
+     * Banner开始滚动
+     **/
+    public void startViewPagerScroll(int delayTimeInMills) {
+        viewPager.startAutoScroll(delayTimeInMills); //延迟delayTimeInMills秒启动
+        viewPager.setInterval(1500); //每隔5秒自动切换一次
+        viewPager.setBorderAnimation(false); //最后一张无动画效果
+    }
+
+    /**
+     * Banner停止滚动
+     **/
+    public void stopViewPagerScroll() {
+        viewPager.stopAutoScroll();
     }
 }
